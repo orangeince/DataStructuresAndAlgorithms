@@ -49,6 +49,7 @@ class ArrayQueue<T>: QueueType {
     }
 }
 
+/// Implement queue using linked list
 class Node<T> {
     var element: T
     var next: Node<T>?
@@ -107,8 +108,73 @@ class LinkedListQueue<T>: QueueType {
     }
 }
 
+// 使用数组实现循环队列
+class CircularArrayQueue<T>: QueueType {
+    private var elements: [T] = []
+    private var head: Int = 0
+    private var tail: Int = 0
+    private(set) var capacity: Int
+    private(set) var size: Int
+
+    var isEmpty: Bool { return size == 0 }
+    var isFull: Bool { return size == capacity }
+
+    init(capacity: Int) {
+        self.capacity = capacity
+        self.size = 0
+    }
+    
+    func enqueue(_ element: T) -> Bool {
+        guard !isFull else {
+            return false
+        }
+        if elements.count < capacity {
+            elements.append(element)
+        } else {
+            elements[tail] = element
+        }
+        tail = (tail + 1) % capacity
+        size += 1
+        return true
+    }
+    
+    func dequeue() -> T? {
+        guard !isEmpty else { return nil }
+        let element = elements[head]
+        head = (head + 1) % capacity
+        size -= 1
+        return element
+    }
+    
+    func printDetail() {
+        print("head: \(head)",
+            "tail: \(tail)",
+            separator: " , ",
+            terminator: " | ")
+        if isEmpty {
+            print(" []")
+        } else {
+            if tail > head {
+                for i in head ..< tail {
+                    print(elements[i], terminator: " ")
+                }
+            } else {
+                for i in head ..< elements.endIndex {
+                    print(elements[i], terminator: " ")
+                }
+                for i in 0 ..< tail {
+                    print(elements[i], terminator: " ")
+                }
+            }
+            print()
+        }
+    }
+}
+
+
 //let queue: QueueType = ArrayQueue<Int>(capacity: 3)
-let queue = LinkedListQueue<Int>(capacity: 3)
+//let queue = LinkedListQueue<Int>(capacity: 3)
+let queue = CircularArrayQueue<Int>(capacity: 3)
 queue.enqueue(1)
 queue.enqueue(2)
 queue.enqueue(3)
@@ -120,7 +186,9 @@ queue.printDetail()
 queue.dequeue()
 queue.enqueue(1)
 queue.printDetail()
+queue.dequeue()
 queue.enqueue(4)
 queue.printDetail()
-queue.enqueue(4)
+queue.enqueue(5)
+queue.enqueue(6)
 queue.printDetail()
