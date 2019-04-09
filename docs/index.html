@@ -6,7 +6,7 @@ title: 数据结构与算法笔记
 {% for post in paginator.posts %}
   <h1><a href="{{ site.baseurl }}{{ post.url }}">{{ post.title }}</a></h1>
   <p class="author">
-    <span class="date">{{ page.date | date: "%Y-%m-%d" }}</span>
+    <span class="date">{{ post.date | date: "%Y-%m-%d" }}</span>
   </p>
   <div class="content">
     {{ post.excerpt }}
