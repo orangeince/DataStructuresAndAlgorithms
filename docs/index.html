@@ -6,7 +6,7 @@ title: 数据结构与算法笔记
 {% for post in paginator.posts %}
   <h1><a href="{{ site.baseurl }}{{ post.url }}">{{ post.title }}</a></h1>
   <p class="author">
-    <span class="date">{{ post.date }}</span>
+    <span class="date">{{ page.date | date: "%Y-%m-%d" }}</span>
   </p>
   <div class="content">
     {{ post.excerpt }}
@@ -16,7 +16,7 @@ title: 数据结构与算法笔记
 <!-- Pagination links -->
 <div class="pagination">
   {% if paginator.previous_page %}
-    <a href="{{ paginator.previous_page_path }}" class="previous">
+    <a href="{{ site.baseurl }}{{ paginator.previous_page_path }}" class="previous">
       Previous
     </a>
   {% else %}
@@ -26,7 +26,7 @@ title: 数据结构与算法笔记
     Page: {{ paginator.page }} of {{ paginator.total_pages }}
   </span>
   {% if paginator.next_page %}
-    <a href="{{ paginator.next_page_path }}" class="next">Next</a>
+    <a href="{{ site.baseurl }}{{ paginator.next_page_path }}" class="next">Next</a>
   {% else %}
     <span class="next ">Next</span>
   {% endif %}
