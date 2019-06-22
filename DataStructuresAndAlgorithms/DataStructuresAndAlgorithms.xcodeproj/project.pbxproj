@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXFileReference section */
+		F50DF4CE22BE07A100E9EB88 /* BinarySearch.playground */ = {isa = PBXFileReference; lastKnownFileType = file.playground; path = BinarySearch.playground; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.swift; };
 		F56AB49F224A122B0050860C /* Stack.playground */ = {isa = PBXFileReference; lastKnownFileType = file.playground; path = Stack.playground; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.swift; };
 		F5E3EFA7224DF5F2003588F4 /* Queue.playground */ = {isa = PBXFileReference; lastKnownFileType = file.playground; path = Queue.playground; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.swift; };
 		F5E3EFAA2250C805003588F4 /* 11.Sorted.playground */ = {isa = PBXFileReference; lastKnownFileType = file.playground; path = 11.Sorted.playground; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.swift; };
@@ -16,6 +17,7 @@
 		F56AB498224A11DB0050860C = {
 			isa = PBXGroup;
 			children = (
+				F50DF4CE22BE07A100E9EB88 /* BinarySearch.playground */,
 				F5E3EFAA2250C805003588F4 /* 11.Sorted.playground */,
 				F5E3EFA7224DF5F2003588F4 /* Queue.playground */,
 				F56AB49F224A122B0050860C /* Stack.playground */,
