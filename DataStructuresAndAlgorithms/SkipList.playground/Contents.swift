@@ -17,6 +17,7 @@ class Node {
     }
 }
 
+// TODO: 代码解读
 class SkipList {
     private static let randomPercent = 0.5
     private let head: Node = Node(data: 0, maxLevel: 0)
@@ -37,14 +38,10 @@ class SkipList {
         }
     }
     
-    // TODO: 代码解读
     func insert(value: Int) {
         let level = randomLevel()
         let newNode = Node(data: value, maxLevel: level)
-        var update: [Node?] = Array(repeating: nil, count: level)
-        for i in 0..<level {
-            update[i] = head
-        }
+        var update: [Node?] = Array(repeating: head, count: level)
         
         var p = head
         for i in (0..<level).reversed() {
@@ -64,7 +61,25 @@ class SkipList {
         }
     }
     
-    // TODO: Add implement code of delete method
+    func delete(value: Int){
+        var update: [Node?] = Array(repeating: head, count: levelCount)
+        var p = head
+        for i in (0..<levelCount).reversed() {
+            while let n = p.forwards[i], n.data < value {
+                p = n
+            }
+            update[i] = p
+        }
+        
+        for i in 0..<levelCount {
+            if let n = update[i]?.forwards[i], n.data == value {
+                update[i]?.forwards[i] = n.forwards[i]
+            }
+        }
+        while levelCount > 0, head.forwards[levelCount - 1] == nil {
+            levelCount -= 1
+        }
+    }
     
     func randomLevel() -> Int {
         var level = 1
@@ -76,6 +91,7 @@ class SkipList {
     
     func printAll() {
         var p = head
+        print("List's maxLevel is \(levelCount)")
         while let n = p.forwards[0] {
             print(n.toString())
             p = n
@@ -83,14 +99,35 @@ class SkipList {
     }
 }
 
+
 let list = SkipList()
-list.insert(value: 1)
-list.insert(value: 10)
-list.insert(value: 2)
-list.insert(value: 3)
-list.insert(value: 5)
-list.insert(value: 8)
-list.insert(value: 6)
-list.printAll()
-list.find(value: 3)?.toString()
-list.find(value: 13)?.toString()
+let testCase: (String, ()->())->() = { flag, action in
+    print("TestCase: \(flag)")
+    action()
+    list.printAll()
+    print("")
+}
+
+testCase("1") {
+    list.insert(value: 1)
+    list.insert(value: 10)
+    list.insert(value: 2)
+    list.insert(value: 3)
+    list.insert(value: 5)
+    list.insert(value: 8)
+    list.insert(value: 6)
+}
+testCase("2") {
+    list.find(value: 3)?.toString()
+    list.find(value: 13)?.toString()
+    list.delete(value: 3)
+    list.delete(value: 2)
+    list.delete(value: 5)
+    list.find(value: 3)?.toString()
+}
+
+testCase("3") {
+    list.insert(value: 3)
+    list.insert(value: 5)
+    list.find(value: 3)
+}
