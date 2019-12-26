@@ -4,7 +4,6 @@ import Foundation
 
 class Node {
     let value: Int
-    var prev: Node?
     var next: Node?
     init(value: Int) {
         self.value = value
@@ -22,39 +21,39 @@ class CacheStore {
     
     func add(item: Int) {
         guard capacity > 0 else { return }
-        var p = head
-        while let n = p.next, n.value != item {
-            p = n
-        }
-        let node = p.next ?? Node(value: item)
-        node.prev?.next = node.next
-        node.next?.prev = node.prev
+        let previous = findPrevious(of: item)
+        let node = previous?.next ?? Node(value: item)
+        previous?.next = previous?.next?.next
         node.next = head.next
-        node.prev = head
-        head.next?.prev = node
         head.next = node
         if count < capacity {
             count += 1
         } else {
-            p.next = nil
+            previous?.next = nil
         }
     }
     
     func delete(item: Int) {
-        guard let n = find(item: item) else {
+        guard let n = findPrevious(of: item) else {
             return
         }
-        n.prev?.next = n.next
-        n.next?.prev = n.prev
+        n.next = n.next?.next
         count -= 1
     }
     
     func find(item: Int) -> Node? {
-        var p = head.next
-        while let n = p, n.value != item {
-            p = n.next
+        return findPrevious(of: item)?.next
+    }
+    
+    private func findPrevious(of item: Int) -> Node? {
+        var p = head
+        while let n = p.next {
+            if n.value == item {
+                return p
+            }
+            p = n
         }
-        return p
+        return nil
     }
     func printAll() {
         var p = head.next
