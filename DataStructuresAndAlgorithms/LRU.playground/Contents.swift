@@ -1,6 +1,18 @@
 import Foundation
 
 /// LRU
+protocol LRU {
+    associatedtype T = Equatable
+    var capacity: T { get }
+    var count: T { get }
+    func add(item: T)
+    func remove(item: T)
+    func contains(item: T) -> Bool
+    func printAll()
+    var firstValue: T? { get }
+    func isEqual(to seq: [T]) -> Bool
+    init(capacity: Int)
+}
 
 class Node {
     let value: Int
@@ -10,51 +22,81 @@ class Node {
     }
 }
 
-class CacheStore {
-    let head = Node(value: -1)
+/// 使用单链表的方式实现LRU算法
+class SingleLinkedListCache {
     let capacity: Int
-    var count = 0
+    private(set) var count = 0
+    private let head = Node(value: -1)
     
-    init(capacity: Int) {
+    /// 查询结果
+    enum LookupResult {
+        /// 目标节点的前驱节点
+        case previousOfTarget(Node)
+        /// 尾部节点的前驱节点
+        case previousOfEnd(Node)
+    }
+    
+    required init(capacity: Int) {
         self.capacity = capacity
+    }
+    
+    var firstValue: Int? {
+        return head.next?.value
     }
     
     func add(item: Int) {
         guard capacity > 0 else { return }
-        let previous = findPrevious(of: item)
-        let node = previous?.next ?? Node(value: item)
-        previous?.next = previous?.next?.next
+        let node: Node
+        switch lookup(with: item) {
+        case .previousOfTarget(let prev):
+            node = prev.next!
+            prev.next = prev.next?.next
+        case .previousOfEnd(let pe):
+            node = Node(value: item)
+            if count < capacity {
+                count += 1
+            } else {
+                pe.next = nil
+            }
+        }
         node.next = head.next
         head.next = node
-        if count < capacity {
-            count += 1
-        } else {
-            previous?.next = nil
-        }
     }
     
-    func delete(item: Int) {
-        guard let n = findPrevious(of: item) else {
+    /// 删除节点
+    func remove(item: Int) {
+        guard case .previousOfTarget(let prev) = lookup(with: item) else {
             return
         }
-        n.next = n.next?.next
+        prev.next = prev.next?.next
         count -= 1
     }
     
+    /// 查询节点
     func find(item: Int) -> Node? {
-        return findPrevious(of: item)?.next
+        guard case .previousOfTarget(let n) = lookup(with: item)
+            else { return nil }
+        return n.next
     }
     
-    private func findPrevious(of item: Int) -> Node? {
+    /// 查询目标值
+    ///   - returns:
+    ///     1. 找到目标值则返回目标节点的前驱节点
+    ///     2. 否则返回尾部节点的前驱节点
+    private func lookup(with item: Int) -> LookupResult {
         var p = head
         while let n = p.next {
             if n.value == item {
-                return p
+                return .previousOfTarget(p)
+            } else if n.next != nil {
+                p = n
+            } else {
+                break
             }
-            p = n
         }
-        return nil
+        return .previousOfEnd(p)
     }
+    
     func printAll() {
         var p = head.next
         print("count: \(count), items: ", terminator: " ")
@@ -65,6 +107,11 @@ class CacheStore {
         print()
     }
     
+    func contains(item: Int) -> Bool {
+        return find(item: item) != nil
+    }
+    
+    /// 验证数据的序列是否正确
     func isEqual(to seq: [Int]) -> Bool {
         guard count == seq.count else { return false }
         var p = head.next
@@ -74,69 +121,71 @@ class CacheStore {
             }
             p = n.next
         }
-        return true
+        return p == nil
     }
 }
+
+extension SingleLinkedListCache: LRU {}
 
 let asert: (String,()->Bool)->() = { flag, condition in
     print(condition() ? "\(flag): Succeed✅" : "\(flag): Failed❌")
 }
 
-let store = CacheStore(capacity: 3)
-store.add(item: 0)
-asert("1") {
-    store.count == 1
+
+func test<T: LRU>(implementation: T.Type) where T.T == Int {
+    let store = implementation.init(capacity: 3)
+    store.add(item: 0)
+    asert("1") {
+        store.contains(item: 0)
+    }
+    store.printAll()
+    
+    store.add(item: 1)
+    asert("2.1") {
+        store.count == 2
+    }
+    asert("2.2") {
+        store.isEqual(to: [1, 0])
+    }
+    
+    store.remove(item: 1)
+    asert("3") {
+        store.isEqual(to: [0])
+    }
+    
+    store.add(item: 1)
+    store.add(item: 2)
+    asert("4") {
+        store.isEqual(to: [2,1,0])
+    }
+    store.printAll()
+    
+    store.add(item: 3)
+    asert("5") {
+        store.isEqual(to: [3,2,1])
+    }
+    store.printAll()
+    
+    store.add(item: 2)
+    asert("6") {
+        store.isEqual(to: [2,3,1])
+    }
+    store.printAll()
+    
+    store.remove(item: 3)
+    asert("7") {
+        store.isEqual(to: [2,1])
+    }
+    store.remove(item: 2)
+    asert("8") {
+        store.firstValue == 1
+    }
+    store.printAll()
+    
+    store.remove(item: 1)
+    asert("9") {
+        store.count == 0
+    }
 }
-asert("2") {
-    store.find(item: 0) != nil
-}
-store.add(item: 1)
-asert("3") {
-    store.count == 2
-}
-store.delete(item: 1)
-asert("4.1") {
-    store.count == 1
-}
-store.add(item: 1)
-store.add(item: 2)
-asert("4.2") {
-    store.head.next?.value == 2
-}
-store.printAll()
-store.add(item: 3)
-asert("5") {
-    store.count == 3
-}
-store.printAll()
-asert("6") {
-    store.head.next?.value == 3
-}
-store.add(item: 4)
-store.printAll()
-store.add(item: 2)
-asert("8") {
-    store.isEqual(to: [2,4,3])
-}
-store.printAll()
-store.delete(item: 4)
-asert("9") {
-    store.isEqual(to: [2,3])
-}
-store.delete(item: 2)
-asert("10") {
-    store.isEqual(to: [3])
-}
-store.printAll()
-store.delete(item: 3)
-asert("11") {
-    store.head.next == nil
-}
-asert("13") {
-    store.count == 0
-}
-let s = CacheStore(capacity: 0)
-s.add(item: 0)
-asert("14") {
-    s.count == 0
-}
+
+test(implementation: SingleLinkedListCache.self)
