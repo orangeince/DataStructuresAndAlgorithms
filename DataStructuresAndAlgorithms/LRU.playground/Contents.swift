@@ -24,15 +24,17 @@ class CacheStore {
     func add(item: Int) {
         guard capacity > 0 else { return }
         if let n = find(item: item) {
-            if n === tail {
-                if n.prev === head {
-                    tail = nil
-                } else {
-                    tail = n.prev
-                }
+            guard n !== head.next else {
+                return
+            }
+            if n === tail && n.prev !== head {
+                tail = n.prev
             }
             n.prev?.next = n.next
+            head.next?.prev = n
+            n.next = head.next
             head.next = n
+            n.prev = head
         } else {
             let node = Node(value: item)
             node.prev = head
@@ -55,10 +57,11 @@ class CacheStore {
         guard let n = find(item: item) else {
             return
         }
-        n.prev?.next = n.next
         if n === tail {
-            tail = nil
+            tail = n === head.next ? nil : n.prev
         }
+        n.prev?.next = n.next
+        n.next?.prev = n.prev
         count -= 1
     }
     
@@ -77,6 +80,18 @@ class CacheStore {
             p = n.next
         }
         print()
+    }
+    
+    func isEqual(to seq: [Int]) -> Bool {
+        guard count == seq.count else { return false }
+        var p = head.next
+        for i in 0..<seq.count {
+            guard let n = p, n.value == seq[i] else {
+                return false
+            }
+            p = n.next
+        }
+        return true
     }
 }
 
@@ -119,4 +134,29 @@ asert("6") {
 }
 asert("7") {
     store.tail?.value == 1
+}
+store.add(item: 4)
+store.printAll()
+store.add(item: 2)
+asert("8") {
+    store.isEqual(to: [2,4,3])
+}
+store.delete(item: 4)
+asert("9") {
+    store.isEqual(to: [2,3])
+}
+store.delete(item: 2)
+asert("10") {
+    store.isEqual(to: [3])
+}
+store.printAll()
+store.delete(item: 3)
+asert("11") {
+    store.head.next == nil
+}
+asert("12") {
+    store.tail == nil
+}
+asert("13") {
+    store.count == 0
 }
