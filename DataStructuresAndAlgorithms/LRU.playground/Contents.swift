@@ -14,7 +14,6 @@ class Node {
 class CacheStore {
     let head = Node(value: -1)
     let capacity: Int
-    var tail: Node?
     var count = 0
     
     init(capacity: Int) {
@@ -23,42 +22,27 @@ class CacheStore {
     
     func add(item: Int) {
         guard capacity > 0 else { return }
-        if let n = find(item: item) {
-            guard n !== head.next else {
-                return
-            }
-            if n === tail && n.prev !== head {
-                tail = n.prev
-            }
-            n.prev?.next = n.next
-            head.next?.prev = n
-            n.next = head.next
-            head.next = n
-            n.prev = head
+        var p = head
+        while let n = p.next, n.value != item {
+            p = n
+        }
+        let node = p.next ?? Node(value: item)
+        node.prev?.next = node.next
+        node.next?.prev = node.prev
+        node.next = head.next
+        node.prev = head
+        head.next?.prev = node
+        head.next = node
+        if count < capacity {
+            count += 1
         } else {
-            let node = Node(value: item)
-            node.prev = head
-            node.next = head.next
-            head.next?.prev = node
-            head.next = node
-            if tail == nil {
-                tail = node
-                count += 1
-            } else if count < capacity {
-                count += 1
-            } else {
-                tail = tail?.prev
-                tail?.next = nil
-            }
+            p.next = nil
         }
     }
     
     func delete(item: Int) {
         guard let n = find(item: item) else {
             return
-        }
-        if n === tail {
-            tail = n === head.next ? nil : n.prev
         }
         n.prev?.next = n.next
         n.next?.prev = n.prev
@@ -120,9 +104,6 @@ store.add(item: 2)
 asert("4.2") {
     store.head.next?.value == 2
 }
-asert("4.3") {
-    store.tail?.value == 0
-}
 store.printAll()
 store.add(item: 3)
 asert("5") {
@@ -132,15 +113,13 @@ store.printAll()
 asert("6") {
     store.head.next?.value == 3
 }
-asert("7") {
-    store.tail?.value == 1
-}
 store.add(item: 4)
 store.printAll()
 store.add(item: 2)
 asert("8") {
     store.isEqual(to: [2,4,3])
 }
+store.printAll()
 store.delete(item: 4)
 asert("9") {
     store.isEqual(to: [2,3])
@@ -154,9 +133,11 @@ store.delete(item: 3)
 asert("11") {
     store.head.next == nil
 }
-asert("12") {
-    store.tail == nil
-}
 asert("13") {
     store.count == 0
+}
+let s = CacheStore(capacity: 0)
+s.add(item: 0)
+asert("14") {
+    s.count == 0
 }
