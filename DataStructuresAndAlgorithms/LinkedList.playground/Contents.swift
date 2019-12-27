@@ -1,34 +1,75 @@
 import Foundation
 
 /// 链表相关的
-
-/// 单链表反转
-class ReversibleLinkedList<T> {
-    class Node<T> {
-        let value: T?
-        var next: Node<T>?
-        init(value: T?, next: Node<T>? = nil) {
-            self.value = value
-            self.next = next
-        }
+class Node {
+    let value: Int
+    var next: Node?
+    init(value: Int, next: Node? = nil) {
+        self.value = value
+        self.next = next
     }
-    
-    let head: Node<T> = Node(value: nil)
-    let count: Int
-    init(elements: [T]) {
+}
+
+protocol LinkedListType {
+    var head: Node { get }
+    var count: Int { get }
+    func printAll()
+    func isEqual(to seq: [Int]) -> Bool
+}
+
+extension LinkedListType {
+    func printAll() {
+        var p = head
+        while let n = p.next {
+            print(n.value, terminator: " ")
+            p = n
+        }
+        print()
+    }
+    func isEqual(to seq: [Int]) -> Bool {
+        guard !seq.isEmpty else {
+            return head.next == nil
+        }
+        var p: Node = head
+        for n in seq {
+            guard let cur = p.next, cur.value == n
+                else { return false }
+            p = cur
+        }
+        return p.next == nil
+    }
+}
+
+class LinkedList: LinkedListType {
+    let head: Node = Node(value: -1)
+    var count: Int = 0
+    init(elements: [Int]) {
         count = elements.count
-        var p: Node<T> = head
+        var p = head
         for e in elements {
             let n = Node(value: e)
             p.next = n
             p = n
         }
     }
-    
+}
+
+
+// 测试用例集合
+let testCollection: (String) -> ((Int, ()->Bool) ->()) = { name in
+    print("-- Begin test for <\(name)>")
+    return { n, condition in
+        print("case{\(n)}", terminator: ": ")
+        condition() ? print("Succeed✅") : print("Failed❌")
+    }
+}
+
+/// 单链表反转
+class ReversibleLinkedList: LinkedList {
     func reverse() {
         guard count > 1 else { return }
-        let p1: Node<T> = Node(value: nil, next: head.next)
-        let p2: Node<T> = Node(value: nil, next: head.next?.next)
+        let p1: Node = Node(value: -1, next: head.next)
+        let p2: Node = Node(value: -1, next: head.next?.next)
         head.next?.next = nil
         while let center = p2.next {
             p2.next = center.next
@@ -37,46 +78,20 @@ class ReversibleLinkedList<T> {
         }
         head.next = p1.next
     }
-    
-    func printAll() {
-        var p = head
-        while let n = p.next {
-            print(n.value!, terminator: " ")
-            p = n
-        }
-        print()
-    }
 }
 
-let list = ReversibleLinkedList(elements: [1,2,5])
-list.printAll()
+let list = ReversibleLinkedList(elements: [1,2,3,4,5])
+let tc1 = testCollection("ReversibleLinkedList")
+tc1(0) {
+    list.isEqual(to: [1,2,3,4,5])
+}
 list.reverse()
-list.printAll()
+tc1(1) {
+    list.isEqual(to: [5,4,3,2,1])
+}
 
 // 有序链表合并
-class MargibleLinkedList {
-    class Node {
-        let value: Int
-        var next: Node?
-        init(value: Int, next: Node? = nil) {
-            self.value = value
-            self.next = next
-        }
-    }
-    
-    let head = Node(value: -1)
-    let count: Int
-
-    init(elements: [Int]) {
-        count = elements.count
-        var p = head
-        for n in elements {
-            let node = Node(value: n)
-            p.next = node
-            p = node
-        }
-    }
-    
+class MargibleLinkedList: LinkedList {
     func merge(other: MargibleLinkedList) {
         guard var second = other.head.next else { return }
         guard var first = head.next else {
@@ -98,20 +113,12 @@ class MargibleLinkedList {
         }
         first.next = second
     }
-    
-    func printAll() {
-        var p = head
-        while let n = p.next {
-            print(n.value, terminator: " ")
-            p = n
-        }
-        print()
-    }
 }
 
-//let mlist = MargibleLinkedList(elements: [1,7,13,15])
-//let other = MargibleLinkedList(elements: [2,4,6,8,14,20])
 let mlist = MargibleLinkedList(elements: [2,4,7,10])
-let other = MargibleLinkedList(elements: [1,3,5,6,8,9,11])
+let other = MargibleLinkedList(elements: [1,3,5,6,8,9])
+let tc2 = testCollection("MargibleLinkedList")
 mlist.merge(other: other)
-mlist.printAll()
+tc2(0) {
+    mlist.isEqual(to: [1,2,3,4,5,6,7,8,9,10])
+}
