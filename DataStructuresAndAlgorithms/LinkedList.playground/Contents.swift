@@ -125,3 +125,40 @@ mlist.merge(other: other)
 tc2(0) {
     mlist.isEqual(to: [1,2,3,4,5,6,7,8,9,10])
 }
+// 链表的中间节点
+class CentralLinkedList: LinkedList {
+    func center() -> Node? {
+        var first = head.next
+        var second = head.next
+        while let n = second?.next?.next {
+            first = first?.next
+            second = n
+        }
+        return first
+    }
+}
+let tc3 = testCollection("CentralLinkedList")
+var clist = CentralLinkedList(elements: [1,2,3,4,5])
+tc3(0) {
+    clist.center()?.value == 3
+}
+clist = CentralLinkedList(elements: [1,2])
+tc3(1) {
+    clist.center()?.value == 1
+}
+clist = CentralLinkedList(elements: [1])
+tc3(2) {
+    clist.center()?.value == 1
+}
+clist = CentralLinkedList(elements: [1,2,3,4])
+tc3(3) {
+    clist.center()?.value == 2
+}
+clist = CentralLinkedList(elements: [1,2,3,4,5,6,7,8,9])
+tc3(4) {
+    clist.center()?.value == 5
+}
+clist = CentralLinkedList(elements: [1,2,3,4,5,6,7,8,9,10])
+tc3(5) {
+    clist.center()?.value == 5
+}
