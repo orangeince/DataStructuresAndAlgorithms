@@ -82,16 +82,27 @@ class ReversibleLinkedList: LinkedList {
     }
 }
 
-let list = ReversibleLinkedList(elements: [1,2,3,4,5])
 let tc1 = testCollection("ReversibleLinkedList")
-tc1(0) {
-    list.isEqual(to: [1,2,3,4,5])
-}
+var list = ReversibleLinkedList(elements: [1,2,3,4,5])
 list.reverse()
-tc1(1) {
+tc1(0) {
     list.isEqual(to: [5,4,3,2,1])
 }
-list.printAll()
+list = ReversibleLinkedList(elements: [1,2])
+list.reverse()
+tc1(1) {
+    list.isEqual(to: [2,1])
+}
+list = ReversibleLinkedList(elements: [1])
+list.reverse()
+tc1(2) {
+    list.isEqual(to: [1])
+}
+list = ReversibleLinkedList(elements: [])
+list.reverse()
+tc1(3) {
+    list.isEqual(to: [])
+}
 
 // 有序链表合并
 class MargibleLinkedList: LinkedList {
@@ -118,13 +129,31 @@ class MargibleLinkedList: LinkedList {
     }
 }
 
-let mlist = MargibleLinkedList(elements: [2,4,7,10])
-let other = MargibleLinkedList(elements: [1,3,5,6,8,9])
 let tc2 = testCollection("MargibleLinkedList")
+var mlist = MargibleLinkedList(elements: [2,4,7,10])
+var other = MargibleLinkedList(elements: [1,3,5,6,8,9])
 mlist.merge(other: other)
 tc2(0) {
     mlist.isEqual(to: [1,2,3,4,5,6,7,8,9,10])
 }
+mlist = MargibleLinkedList(elements: [2])
+other = MargibleLinkedList(elements: [1])
+mlist.merge(other: other)
+tc2(1) {
+    mlist.isEqual(to: [1,2])
+}
+mlist = MargibleLinkedList(elements: [1])
+other = MargibleLinkedList(elements: [2])
+mlist.merge(other: other)
+tc2(2) {
+    mlist.isEqual(to: [1,2])
+}
+mlist = MargibleLinkedList(elements: [1])
+other = MargibleLinkedList(elements: [])
+tc2(3) {
+    mlist.isEqual(to: [1])
+}
+
 // 链表的中间节点
 class CentralLinkedList: LinkedList {
     func center() -> Node? {
