@@ -68,15 +68,17 @@ let testCollection: (String) -> ((Int, ()->Bool) ->()) = { name in
 class ReversibleLinkedList: LinkedList {
     func reverse() {
         guard count > 1 else { return }
-        let p1: Node = Node(value: -1, next: head.next)
-        let p2: Node = Node(value: -1, next: head.next?.next)
-        head.next?.next = nil
-        while let center = p2.next {
-            p2.next = center.next
-            center.next = p1.next
-            p1.next = center
+        guard var p1 = head.next, var p2 = head.next?.next else {
+            return
         }
-        head.next = p1.next
+        p1.next = nil
+        while let node = p2.next {
+            p2.next = p1
+            p1 = p2
+            p2 = node
+        }
+        p2.next = p1
+        head.next = p2
     }
 }
 
@@ -89,6 +91,7 @@ list.reverse()
 tc1(1) {
     list.isEqual(to: [5,4,3,2,1])
 }
+list.printAll()
 
 // 有序链表合并
 class MargibleLinkedList: LinkedList {
