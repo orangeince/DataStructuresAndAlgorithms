@@ -244,3 +244,39 @@ tc4(4) {
     !cl4.isCircular
 }
 
+extension LinkedList {
+    // 删除第N个节点
+    func remove(at index: Int) -> Node? {
+        guard count > 0 && index >= 0 && index < count else { return nil }
+        var p: Node = head
+        var i = 0
+        while let n = p.next, i < index {
+            p = n
+            i += 1
+        }
+        let result = p.next
+        p.next = p.next?.next
+        count -= 1
+        return result
+    }
+    
+}
+let tc5 = testCollection("LinkedList.remove(at:)")
+let l5 = LinkedList(elements: [0,1,2,3,4])
+let removed = l5.remove(at: 0)
+tc5(0) {
+    l5.isEqual(to: [1,2,3,4])
+}
+tc5(1) {
+    removed?.value == 0
+}
+l5.remove(at: 3)
+tc5(2) {
+    l5.isEqual(to: [1,2,3])
+}
+l5.remove(at: 2)
+l5.remove(at: 0)
+l5.remove(at: 0)
+tc5(3) {
+    l5.count == 0
+}
