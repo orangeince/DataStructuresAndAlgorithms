@@ -263,28 +263,23 @@ extension LinkedList {
     // 删除倒数第N个节点，因为其他算法练习里有对count的维护，此练习的用意是不参考count属性的情况下完成实现逻辑
     func removeLast(at index: Int) -> Node? {
         guard head.next != nil && index > 0 else { return nil }
-        var slow = head
         var fast = head
+        var i = 1
+        while let fn = fast.next, i < index {
+            fast = fn
+            i += 1
+        }
+        guard i == index else { return nil }
+        var slow = head
         // slow's previous
         var sp = head
-        var i = 0
-        while let sn = slow.next, let fn = fast.next?.next {
-            i += 1
-            slow = sn
+        while let fn = fast.next, let sn = slow.next {
             fast = fn
             sp = slow
+            slow = sn
         }
-        let total = i * 2 + (fast.next == nil ? 0 : 1)
-        guard total >= index else { return nil }
-        let n = total - index
-        var k = n < i ? n : n - i
-        var p = n < i ? head : sp
-        while k > 0, let pn = p.next {
-            p = pn
-            k -= 1
-        }
-        let result = p.next
-        p.next = p.next?.next
+        let result = sp.next
+        sp.next = sp.next?.next
         return result
     }
 }
@@ -308,7 +303,7 @@ tc5(3) {
     l5.count == 0
 }
 let tc6 = testCollection("LinkedList.removeLast(at:)")
-let l6 = LinkedList(elements: [0,1,2,3,4,5,6])
+var l6 = LinkedList(elements: [0,1,2,3,4,5,6])
 let r0 = l6.removeLast(at: 1)
 tc6(0) {
     r0?.value == 6
@@ -327,4 +322,13 @@ tc6(3){
 l6.removeLast(at: 3)
 tc6(4) {
     l6.isEqual(to: [1,2,4,5])
+}
+l6.removeLast(at: 2)
+tc6(5) {
+    l6.isEqual(to: [1,2,5])
+}
+l6 = LinkedList(elements: [1])
+l6.removeLast(at: 1)
+tc6(6) {
+    l6.isEqual(to: [])
 }
