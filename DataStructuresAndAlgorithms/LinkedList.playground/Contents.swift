@@ -191,3 +191,56 @@ clist = CentralLinkedList(elements: [1,2,3,4,5,6,7,8,9,10])
 tc3(5) {
     clist.center()?.value == 5
 }
+
+class CircularLinkedList: LinkedList {
+    init(elements: [Int], circleStartAt index: Int) {
+        super.init(elements: elements)
+        guard index >= 0 else { return }
+        var p = head
+        var start: Node? = nil
+        var i = 0
+        while let n = p.next {
+            p = n
+            if i == index {
+                start = n
+            } else {
+                i += 1
+            }
+        }
+        p.next = start
+    }
+    
+    var isCircular: Bool {
+        var slow = head
+        var fast = head
+        while let sn = slow.next, let fn = fast.next?.next {
+            guard sn !== fn else { return true }
+            slow = sn
+            fast = fn
+        }
+        return false
+    }
+}
+
+let tc4 = testCollection("CircularLinkedList")
+let cl0 = CircularLinkedList(elements: [0,1,2,3,4,5,6], circleStartAt: 3)
+tc4(0) {
+    cl0.isCircular
+}
+let cl1 = CircularLinkedList(elements: [0,1], circleStartAt: 0)
+tc4(1) {
+    cl1.isCircular
+}
+let cl2 = CircularLinkedList(elements: [0], circleStartAt: 0)
+tc4(2) {
+    cl2.isCircular
+}
+let cl3 = CircularLinkedList(elements: [0, 1], circleStartAt: 1)
+tc4(3) {
+    cl3.isCircular
+}
+let cl4 = CircularLinkedList(elements: [0, 1], circleStartAt: -1)
+tc4(4) {
+    !cl4.isCircular
+}
+
