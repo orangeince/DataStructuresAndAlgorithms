@@ -1,121 +1,133 @@
 import Foundation
 
+protocol HashKeyType: Equatable {
+    var hv: Int { get }
+}
+extension Int: HashKeyType {
+    var hv: Int { return self }
+}
+
 /// 实现一个哈希表，使用单链表的方式解决哈希冲突
-class IntHashTable {
+class HashTable<K: HashKeyType, V> {
     /// 单链表节点
-    class Node {
-        let value: Int
-        var next: Node?
-        init(value: Int, next: Node? = nil) {
+    class Node<K,V> {
+        let key: K
+        let value: V
+        var next: Node<K,V>?
+        init(key: K, value: V, next: Node<K, V>? = nil) {
+            self.key = key
             self.value = value
             self.next = next
         }
     }
+    private var length: Int
     /// 单链表数组, 通过hash函数计算出来的结果即为对应的数组下标
-    var nodes: [Node?] = Array.init(repeating: nil, count: 10)
+    var nodes: [Node<K,V>?]
     
-    func add(value: Int) {
-        let h = hashValue(for: value)
-        let n = Node(value: value)
+    init(length: Int) {
+        self.length = length
+        nodes = Array.init(repeating: nil, count: length)
+    }
+    
+    func add(key: K, value: V) {
+        let h = hashValue(for: key)
+        let n = Node(key: key, value: value)
         guard var prev = nodes[h] else {
             nodes[h] = n
             return
         }
+        if prev.key == key {
+            return
+        }
         while let next = prev.next {
+            if next.key == key {
+                return
+            }
             prev = next
         }
         prev.next = n
     }
     
-    func delete(value: Int) {
-        let h = hashValue(for: value)
+    func remove(key: K) -> Node<K,V>? {
+        let h = hashValue(for: key)
         guard var p = nodes[h] else {
-            return
+            return nil
         }
-        guard p.value != value else {
+        guard p.key != key else {
             nodes[h] = p.next
-            return
+            return p
         }
         while let n = p.next {
-            if n.value == value {
+            if n.key == key {
                 p.next = n.next
-                return
+                return n
             }
             p = n
         }
+        return nil
+    }
+    
+    func search(key: K) -> Node<K, V>? {
+        let h = hashValue(for: key)
+        guard var p = nodes[h] else {
+            return nil
+        }
+        guard p.key != key else {
+            return p
+        }
+        while let n = p.next {
+            if n.key == key {
+                return n
+            }
+            p = n
+        }
+        return nil
     }
     
     // 散列函数
-    private func hashValue(for v: Int) -> Int {
-        return v % 10
+    private func hashValue(for key: K) -> Int {
+        return key.hv % length
     }
     
-    func contains(_ value: Int) -> Bool {
-        let h = hashValue(for: value)
+    func contains(_ key: K) -> Bool {
+        let h = hashValue(for: key)
         guard var prev = nodes[h] else {
             return false
         }
         while let next = prev.next {
-            if prev.value == value {
+            if prev.key == key {
                 return true
             }
             prev = next
         }
-        return prev.value == value
+        return prev.key == key
     }
 }
 
 let asert: (Int,()->Bool)->() = { flag, condition in
     print(condition() ? "testcase{\(flag)}: Succeed✅" : "testcast{\(flag)}: Failed❌")
 }
-let table = IntHashTable()
+let table = HashTable<Int, Int>(length: 10)
+table.add(key:0, value: 0)
 asert(0) {
-    !table.contains(0)
-}
-table.add(value: 0)
-asert(1) {
     table.contains(0)
 }
-asert(2) {
-    !table.contains(10)
+table.add(key: 0, value: 10)
+asert(1) {
+    table.search(key: 0)?.value == 0
 }
-table.add(value: 10)
+table.add(key: 1, value: 1)
+table.add(key: 2, value: 2)
+table.add(key: 3, value: 3)
+table.add(key: 4, value: 4)
+table.add(key: 5, value: 5)
+table.add(key: 11, value: 11)
+asert(2) {
+    table.contains(11)
+}
 asert(3) {
-    table.contains(10)
+    table.remove(key: 1)?.value == 1
 }
 asert(4) {
-    !table.contains(2)
+    table.search(key: 11)?.value == 11
 }
-table.add(value: 2)
-table.add(value: 3)
-table.add(value: 4)
-table.add(value: 5)
-table.add(value: 6)
-table.add(value: 7)
-table.add(value: 8)
-table.add(value: 9)
-table.add(value: 11)
-table.add(value: 13)
-asert(5) {
-    table.contains(3)
-}
-table.add(value: 23)
-asert(6) {
-    table.contains(23)
-}
-table.delete(value: 13)
-asert(7) {
-    !table.contains(13)
-}
-asert(8) {
-    table.contains(23)
-}
-table.delete(value: 3)
-asert(9) {
-    table.contains(23)
-}
-table.delete(value: 23)
-asert(10) {
-    !table.contains(23)
-}
-
