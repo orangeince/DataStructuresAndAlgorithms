@@ -14,19 +14,20 @@ protocol LRU {
     init(capacity: Int)
 }
 
-class Node {
-    let value: Int
-    var next: Node?
-    init(value: Int) {
-        self.value = value
-    }
-}
 
 /// 使用单链表的方式实现LRU算法
 class SingleLinkedListCache {
     let capacity: Int
     private(set) var count = 0
     private let head = Node(value: -1)
+    
+    class Node {
+        let value: Int
+        var next: Node?
+        init(value: Int) {
+            self.value = value
+        }
+    }
     
     /// 查询结果
     enum LookupResult {
@@ -127,12 +128,65 @@ class SingleLinkedListCache {
 
 extension SingleLinkedListCache: LRU {}
 
+/// 使用哈希表+双向链表实现LRU缓存
+class HashTableLinkedCache: LRU {
+    let head: Node = Node(value: -1)
+    let capacity: Int
+    var count: Int = 0
+    var firstValue: Int? {
+        return head.next?.value
+    }
+    
+    /// 双向链表
+    class Node {
+        let value: Int
+        var next: Node?
+        var prev: Node?
+        var hNext: Node?
+        init(value: Int, next: Node? = nil, prev: Node? = nil, hNext: Node? = nil) {
+            self.value = value
+            self.next = next
+            self.prev = prev
+            self.hNext = hNext
+        }
+    }
+    
+    class HashTable {
+        let capacity: Int
+        let table: [Node?]
+        init(capacity: Int) {
+            self.capacity = capacity
+            table = Array.init(repeating: nil, count: 10)
+        }
+        
+    }
+    
+    required init(capacity: Int) {
+        self.capacity = capacity
+    }
+    
+    func add(item: Int) {
+        
+    }
+    func remove(item: Int) {
+    }
+    func printAll() {
+    }
+    func contains(item: Int) -> Bool {
+        return false
+    }
+    func isEqual(to seq: [Int]) -> Bool {
+        return false
+    }
+}
+
 let asert: (String,()->Bool)->() = { flag, condition in
     print(condition() ? "\(flag): Succeed✅" : "\(flag): Failed❌")
 }
 
 
 func test<T: LRU>(implementation: T.Type) where T.T == Int {
+    print("-- This is test for \(implementation) --")
     let store = implementation.init(capacity: 3)
     store.add(item: 0)
     asert("1") {
@@ -189,3 +243,4 @@ func test<T: LRU>(implementation: T.Type) where T.T == Int {
 }
 
 test(implementation: SingleLinkedListCache.self)
+test(implementation: HashTableLinkedCache.self)
