@@ -131,6 +131,8 @@ extension SingleLinkedListCache: LRU {}
 /// 使用哈希表+双向链表实现LRU缓存
 class HashTableLinkedCache: LRU {
     let head: Node = Node(value: -1)
+    var tail: Node?
+    let table: HashTable
     let capacity: Int
     var count: Int = 0
     var firstValue: Int? {
@@ -153,30 +155,157 @@ class HashTableLinkedCache: LRU {
     
     class HashTable {
         let capacity: Int
-        let table: [Node?]
+        var nodes: [Node?]
         init(capacity: Int) {
             self.capacity = capacity
-            table = Array.init(repeating: nil, count: 10)
+            nodes = Array.init(repeating: nil, count: 10)
+        }
+        func add(value: Int) -> Node? {
+            let h = hashValue(for: value)
+            let n = Node(value: value)
+            guard var prev = nodes[h] else {
+                nodes[h] = n
+                return n
+            }
+            if prev.value == value {
+                return nil
+            }
+            while let next = prev.hNext {
+                if next.value == value {
+                    return nil
+                }
+                prev = next
+            }
+            prev.hNext = n
+            return n
         }
         
+        func remove(value: Int) -> Node? {
+            let h = hashValue(for: value)
+            guard var p = nodes[h] else {
+                return nil
+            }
+            guard p.value != value else {
+                nodes[h] = p.hNext
+                return p
+            }
+            while let n = p.hNext {
+                if n.value == value {
+                    p.hNext = n.hNext
+                    return n
+                }
+                p = n
+            }
+            return nil
+        }
+        
+        func search(value: Int) -> Node? {
+            let h = hashValue(for: value)
+            guard var p = nodes[h] else {
+                return nil
+            }
+            guard p.value != value else {
+                return p
+            }
+            while let n = p.hNext {
+                if n.value == value {
+                    return n
+                }
+                p = n
+            }
+            return nil
+        }
+        
+        func contains(value: Int) -> Bool {
+            let h = hashValue(for: value)
+            guard var prev = nodes[h] else {
+                return false
+            }
+            while let next = prev.hNext {
+                if prev.value == value {
+                    return true
+                }
+                prev = next
+            }
+            return prev.value == value
+        }
+        
+        // 散列函数
+        private func hashValue(for value: Int) -> Int {
+            return value % capacity
+        }
     }
     
     required init(capacity: Int) {
         self.capacity = capacity
+        self.table = HashTable(capacity: capacity)
     }
     
     func add(item: Int) {
-        
+        guard capacity > 0 else { return }
+        if let node = table.search(value: item) {
+            guard node !== head.next else { return }
+            if node === tail {
+                tail = node.prev
+            }
+            node.prev?.next = node.next
+            node.next?.prev = node.prev
+            head.next?.prev = node
+            node.next = head.next
+            node.prev = head
+            head.next = node
+        } else if let node = table.add(value: item) {
+            node.next = head.next
+            node.prev = head
+            head.next?.prev = node
+            head.next = node
+            if count < capacity {
+                count += 1
+                if tail == nil {
+                    tail = node
+                }
+            } else {
+                if let tv = tail?.value {
+                    table.remove(value: tv)
+                }
+                tail = tail?.prev
+                tail?.next = nil
+            }
+        }
     }
     func remove(item: Int) {
+        guard let node = table.remove(value: item) else { return }
+        node.prev?.next = node.next
+        node.next?.prev = node.prev
+        if tail === node {
+            tail = count == 1 ? nil : tail?.prev
+        }
+        count -= 1
     }
     func printAll() {
+        var p = head.next
+        print("count: \(count), items: ", terminator: " ")
+        while let n = p {
+            print("\(n.value) ", terminator: " ")
+            p = n.next
+        }
+        print(", tail: \(tail?.value ?? -1)")
     }
     func contains(item: Int) -> Bool {
-        return false
+        return table.contains(value: item)
     }
     func isEqual(to seq: [Int]) -> Bool {
-        return false
+        guard count == seq.count else { return false }
+        var p = head
+        var i = 0
+        while let n = p.next, i < seq.count {
+            guard n.value == seq[i] else {
+                return false
+            }
+            i += 1
+            p = n
+        }
+        return p.next == nil
     }
 }
 
@@ -224,21 +353,25 @@ func test<T: LRU>(implementation: T.Type) where T.T == Int {
     asert("6") {
         store.isEqual(to: [2,3,1])
     }
-    store.printAll()
-    
-    store.remove(item: 3)
+    store.add(item: 4)
+    store.add(item: 7)
+    store.add(item: 1)
     asert("7") {
-        store.isEqual(to: [2,1])
-    }
-    store.remove(item: 2)
-    asert("8") {
-        store.firstValue == 1
+        store.isEqual(to: [1,7,4])
     }
     store.printAll()
-    
-    store.remove(item: 1)
+    store.remove(item: 7)
+    asert("8") {
+        store.isEqual(to: [1,4])
+    }
+    store.add(item: 2)
     asert("9") {
-        store.count == 0
+        store.firstValue == 2
+    }
+    store.printAll()
+    store.remove(item: 1)
+    asert("10") {
+        store.isEqual(to: [2,4])
     }
 }
 
