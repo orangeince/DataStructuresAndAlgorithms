@@ -108,3 +108,139 @@ print("PostOrder：")
 tree1.orderTest(type: .post)
 print("FloorOrder:")
 tree1.orderTest(type: .floor)
+
+// Part2.二叉查找树
+class BinarySearchTree: Tree {
+    //     13
+    //    /  \
+    //   8    15
+    //  / \     \
+    // 7   11    20
+    //          /
+    //         17
+    static func buildSearchTree() -> BinarySearchTree {
+        let r = Node(13)
+        let l1 = Node(8)
+        r.left = l1
+        l1.left = Node(7)
+        l1.right = Node(11)
+        
+        let r1 = Node(15)
+        r.right = r1
+        let r2 = Node(20)
+        r1.right = r2
+        r2.left = Node(17)
+        
+        return BinarySearchTree(root: r)
+    }
+    
+    func find(value: Int) -> Node? {
+        return find(value: value, node: root)
+    }
+    
+    func findRelated(value: Int) {
+        guard root.value != value else {
+            print("isRoot: \(value)")
+            return
+        }
+        var parent = root
+        var nextNode: Node? = value < root.value ? root.left : root.right
+        while let n = nextNode  {
+            if n.value == value {
+                print("Find!! parent: \(parent.value), left: \(n.left?.value), right: \(n.right?.value)")
+                return
+            }
+            nextNode = value < n.value ? n.left : n.right
+            parent = n
+        }
+        print("not find!")
+    }
+    
+    func insert(value: Int) {
+        // left
+        var parentNode: Node? = root
+        while let node = parentNode {
+            if node.value > value {
+                if node.left == nil {
+                    node.left = Node(value)
+                    print("parent: \(node.value) -> left")
+                    return
+                }
+                parentNode = node.left
+            } else {
+                if node.right == nil {
+                    node.right = Node(value)
+                    print("parent: \(node.value) -> right")
+                    return
+                }
+                parentNode = node.right
+            }
+        }
+    }
+
+    func delete(value: Int) {
+        var parentNode: Node = root
+        var nextNode: Node? = root
+        while let node = nextNode, node.value != value {
+            nextNode = node.value > value ? node.left : node.right
+            parentNode = node
+        }
+        guard let node = nextNode else { return } // 没找到节点
+        let newNode: Node?
+        if node.left != nil && node.right != nil {
+            var rightMin = node.right!
+            var minParent = node.right!
+            while let n = rightMin.left {
+                minParent = rightMin
+                rightMin = n
+            }
+            rightMin.left = node.left
+            if rightMin !== node.right {
+                rightMin.right = node.right
+                minParent.left = nil
+            }
+            newNode = rightMin
+        } else {
+            newNode = node.left ?? node.right
+        }
+        
+        if parentNode.value > value {
+            parentNode.left = newNode
+        } else {
+            parentNode.right = newNode
+        }
+    }
+
+    private func find(value: Int, node: Node?) -> Node? {
+        guard let root = node else { return nil  }
+        switch root.value - value {
+        case 0:
+            return root
+        case ..<0:
+            return find(value: value, node: root.right)
+        default:
+            return find(value: value, node: root.left)
+        }
+    }
+    
+    // 查询树的层数
+    func getLevels() -> Int {
+        return levels(of: root)
+    }
+    private func levels(of node: Node?) -> Int {
+        guard let root = node else { return 0 }
+        return max(levels(of: root.left), levels(of: root.right)) + 1
+    }
+    
+}
+
+let bs = BinarySearchTree.buildSearchTree()
+print(bs.find(value: 7) != nil)
+print(bs.find(value: 14) != nil)
+bs.insert(value: 10)
+bs.delete(value: 15)
+bs.findRelated(value: 20)
+bs.findRelated(value: 10)
+bs.delete(value: 8)
+bs.findRelated(value: 10)
+bs.getLevels()
