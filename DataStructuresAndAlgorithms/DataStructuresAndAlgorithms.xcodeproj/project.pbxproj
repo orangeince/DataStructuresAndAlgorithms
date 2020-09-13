@@ -8,6 +8,7 @@
 
 /* Begin PBXFileReference section */
 		5C630240250B0AE30053D14E /* HeapSorted.playground */ = {isa = PBXFileReference; lastKnownFileType = file.playground; path = HeapSorted.playground; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.swift; };
+		5C630244250DCD050053D14E /* MergeFilesWithSortedData.playground */ = {isa = PBXFileReference; lastKnownFileType = file.playground; path = MergeFilesWithSortedData.playground; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.swift; };
 		F50DF4CE22BE07A100E9EB88 /* BinarySearch.playground */ = {isa = PBXFileReference; lastKnownFileType = file.playground; path = BinarySearch.playground; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.swift; };
 		F5384364249A64E1008F6C09 /* BinaryTree.playground */ = {isa = PBXFileReference; lastKnownFileType = file.playground; path = BinaryTree.playground; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.swift; };
 		F554B70C23B357FE002D72B0 /* LRU.playground */ = {isa = PBXFileReference; lastKnownFileType = file.playground; path = LRU.playground; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.swift; };
@@ -20,9 +21,26 @@
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
+		5C630242250DCC710053D14E /* PracticeCase */ = {
+			isa = PBXGroup;
+			children = (
+				5C630243250DCCB30053D14E /* Heap */,
+			);
+			path = PracticeCase;
+			sourceTree = "<group>";
+		};
+		5C630243250DCCB30053D14E /* Heap */ = {
+			isa = PBXGroup;
+			children = (
+				5C630244250DCD050053D14E /* MergeFilesWithSortedData.playground */,
+			);
+			path = Heap;
+			sourceTree = "<group>";
+		};
 		F56AB498224A11DB0050860C = {
 			isa = PBXGroup;
 			children = (
+				5C630242250DCC710053D14E /* PracticeCase */,
 				5C630240250B0AE30053D14E /* HeapSorted.playground */,
 				F5384364249A64E1008F6C09 /* BinaryTree.playground */,
 				F55D696723BA22F70029AAB9 /* HashTable.playground */,

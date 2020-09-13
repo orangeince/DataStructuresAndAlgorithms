@@ -20,7 +20,7 @@ class Heap {
             preferredComparison = { $0 < $1 }
         }
         self.values = [0] + values
-        for i in (1 ... valueCount / 2 ).reversed() {
+        for i in (1 ... self.values.count / 2 ).reversed() {
             heapify(beginAt: i, endAt: valueCount)
         }
     }
