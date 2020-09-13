@@ -1,10 +1,28 @@
 import Foundation
 
 class Heap {
-    var values: [Int] = [0]
+    private var values: [Int] = [0]
 
     init(values: [Int] = []) {
-        self.values = values
+        self.values = self.values + values
+        var i = values.count / 2
+        while i >= 1 {
+            heapify(at: i, endIndex: values.count - 1)
+            i -= 1
+        }
+    }
+    
+    func sorted() -> [Int] {
+        var cache = values
+        var k = values.count - 1
+        while k > 1 {
+            swap(1, k)
+            k -= 1
+            heapify(at: 1, endIndex: k)
+        }
+        (cache, values) = (values, cache)
+        cache.removeFirst()
+        return cache
     }
     
     func insert(value: Int) {
@@ -73,6 +91,23 @@ class Heap {
         }
 
     }
+    private func heapify(at index: Int, endIndex: Int) {
+        var i = index
+        while true {
+            var maxPos = i
+            if i * 2 <= endIndex && values[i] < values[i * 2] {
+                maxPos = i * 2
+            }
+            if i * 2 + 1 <= endIndex && values[maxPos] < values[i * 2 + 1] {
+                maxPos = i * 2 + 1
+            }
+            if maxPos == i {
+                break
+            }
+            swap(i, maxPos)
+            i = maxPos
+        }
+    }
 
     private func swap(_ a: Int, _ b: Int) {
         (values[a], values[b]) = (values[b], values[a])
@@ -117,17 +152,20 @@ class Heap {
     }
 
 }
-let h = Heap(values: [0,7,5,6,4,2,1])
-h.insert(value: 3)
-h.insert(value: 8)
-h.insert(value: 9)
-h.insert(value: 19)
-h.insert(value: 11)
-h.insert(value: 12)
-h.insert(value: 13)
-h.insert(value: 14)
-h.insert(value: 7)
-h.insert(value: 27)
+//let h = Heap(values: [0,7,5,6,4,2,1])
+//h.insert(value: 3)
+//h.insert(value: 8)
+//h.insert(value: 9)
+//h.insert(value: 19)
+//h.insert(value: 11)
+//h.insert(value: 12)
+//h.insert(value: 13)
+//h.insert(value: 14)
+//h.insert(value: 7)
+//h.insert(value: 27)
+//h.showAll()
+//h.delete(value: 6)
+//h.showAll()
+let h = Heap(values: [7,5,19,8,4,1,20,13,16])
 h.showAll()
-h.delete(value: 6)
-h.showAll()
+h.sorted()
